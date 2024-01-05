@@ -47,9 +47,6 @@ def index():
             summary = query_chatGPT(prompt=summary_prompt,text_data=file_contents,openai_api_key=config.get_property("OPENAI_API_KEY"))
             action_item_table = query_chatGPT(prompt=action_item_table_prompt,text_data=file_contents,openai_api_key=config.get_property("OPENAI_API_KEY"))
 
-            print(summary)
-            print()
-            print(action_item_table)
             # # Send email
             try:
                 msg = Message('Summary of the transcritpion', sender=config.get_property("MAIL_USERNAME"), recipients=[email])
@@ -74,5 +71,3 @@ def index():
 
     return render_template('index.html')
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
