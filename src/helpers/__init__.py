@@ -1,1 +1,2 @@
-from .openai_functions import create_summary
+from .openai_functions import query_chatGPT
+from .prompts import *

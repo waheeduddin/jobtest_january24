@@ -1,5 +1,6 @@
 import json
 import traceback
+import os
 from flask_cors import CORS, cross_origin
 
 
@@ -7,14 +8,14 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_mail import Mail, Message
 import logging
 from config import Config
-from .helpers import create_summary
+from .helpers import query_chatGPT, summary_prompt, action_item_table_prompt
 
 config = Config()
 
 app = Flask(__name__)
 
 cors = CORS(app)
-            
+
 # Configure Flask-Mail settings
 app.config['MAIL_SERVER'] = config.get_property("MAIL_SERVER")
 app.config['MAIL_PORT'] = config.get_property("MAIL_PORT")  # Update with your SMTP port
@@ -36,23 +37,39 @@ def index():
 
         if email and file:
             # Save uploaded file
-            file.save(file.filename)
+            file.save("temp_text_file.txt")
             logging.info(f"File '{file.filename}' uploaded successfully.")
 
             # Read file contents
-            with open(file.filename, 'r') as f:
+            with open("temp_text_file.txt", 'r') as f:
                 file_contents = f.read()
             
-            print(create_summary(file_contents,openai_api_key=config.get_property("OPENAI_API_KEY")))
-            # # Send email
-            # try:
-            #     msg = Message('File Contents', sender='your_email@example.com', recipients=[email])
-            #     msg.body = file_contents
-            #     mail.send(msg)
-            #     logging.info(f"Email sent to {email} with file contents.")
-            # except Exception as e:
-            #     logging.error(f"Failed to send email to {email}. Error: {str(e)}")
+            summary = query_chatGPT(prompt=summary_prompt,text_data=file_contents,openai_api_key=config.get_property("OPENAI_API_KEY"))
+            action_item_table = query_chatGPT(prompt=action_item_table_prompt,text_data=file_contents,openai_api_key=config.get_property("OPENAI_API_KEY"))
 
+            print(summary)
+            print()
+            print(action_item_table)
+            # # Send email
+            try:
+                msg = Message('Summary of the transcritpion', sender=config.get_property("MAIL_USERNAME"), recipients=[email])
+                msg.body = summary
+                mail.send(msg)
+                logging.info(f"Email sent to {email} with summary.")
+            except Exception as e:
+                print("email failed")
+                logging.error(f"Failed to send email to {email}. Error: {str(e)}")
+            
+            try:
+                msg = Message('action item table of the transcription', sender=config.get_property("MAIL_USERNAME"), recipients=[email])
+                msg.body = action_item_table
+                mail.send(msg)
+                logging.info(f"Email sent to {email} with action items.")
+            except Exception as e:
+                print("email failed")
+                logging.error(f"Failed to send email to {email}. Error: {str(e)}")
+
+            os.remove("temp_text_file.txt")
             return redirect(url_for('index'))
 
     return render_template('index.html')

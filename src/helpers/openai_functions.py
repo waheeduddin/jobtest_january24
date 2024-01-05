@@ -1,7 +1,10 @@
 import openai
 import tiktoken
 
-def create_summary(
+from .prompts import chunking_prompt
+
+def query_chatGPT(
+    prompt=None,
     text_data=None,
     openai_api_key = None,
     chat_model="gpt-3.5-turbo",
@@ -9,22 +12,15 @@ def create_summary(
     max_tokens=2500,
 ):
     """
-    Send the prompt at the start of the conversation and then send chunks of text_data to ChatGPT via the OpenAI API.
-    If the text_data is too long, it splits it into chunks and sends each chunk separately.
-
-    Args:
-    - prompt (str, optional): The prompt to guide the model's response.
-    - text_data (str, optional): Additional text data to be included.
-    - max_tokens (int, optional): Maximum tokens for each API call. Default is 2500.
-
-    Returns:
-    - list or str: A list of model's responses for each chunk or an error message.
     """
 
     # Check if the necessary arguments are provided
-    prompt = "Based on the meeting transcription, please generate a 100-word summary of the meeting"
+    if not prompt:
+        return "Error: Prompt is missing. Please provide some prompt to generate responses from."
     if not text_data:
         return "Error: Text data is missing. Please provide some text data."
+    if openai_api_key is None:
+        return "Error: OpenAI API key not found. Please add the key in environment variables."
     openai.api_key = openai_api_key
     # Initialize the tokenizer
     tokenizer = tiktoken.encoding_for_model(chat_model)
@@ -42,13 +38,12 @@ def create_summary(
     # Decode token chunks back to strings
     chunks = [tokenizer.decode(chunk) for chunk in chunks]
 
-    responses = []
     messages = [
         {"role": "user", "content": prompt},
         #"Make a summary of 100 words for the following transcription of a meeting."
         {
             "role": "user",
-            "content": "To provide the text of the transcription, I will send you text in parts. When I am finished, I will tell you 'ALL PARTS SENT'. Do not answer until you have received all the parts.",
+            "content": chunking_prompt,
         },
     ]
     for chunk in chunks:
@@ -62,13 +57,11 @@ def create_summary(
             messages.pop(1)  # Remove the oldest chunk
 
         response = openai.ChatCompletion.create(model=chat_model, messages=messages)
-        chatgpt_response = response.choices[0].message["content"].strip()
-        responses.append(chatgpt_response)
-
+        # chatgpt_response = response.choices[0].message["content"].strip()
+        
     # Add the final "ALL PARTS SENT" message
     messages.append({"role": "user", "content": "ALL PARTS SENT"})
     response = openai.ChatCompletion.create(model=chat_model, messages=messages)
     final_response = response.choices[0].message["content"].strip()
-    responses.append(final_response)
-
-    return responses
+    
+    return final_response

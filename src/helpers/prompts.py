@@ -1,0 +1,3 @@
+summary_prompt = "Based on the meeting transcription, please generate a 100-word summary of the meeting."
+action_item_table_prompt = "Based on the meeting transcription, please generate the action item table, with the action owner and deadlines."
+chunking_prompt = "To provide the text of the transcription, I will send you text in parts. When I am finished, I will tell you 'ALL PARTS SENT'. Do not answer until you have received all the parts." 
