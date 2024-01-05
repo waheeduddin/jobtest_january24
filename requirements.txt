@@ -1,0 +1,9 @@
+pandas==2.0.0
+pdfplumber==0.10.2
+langchain==0.0.327
+openai==0.27.8
+Flask==2.3.3
+Flask-Cors==4.0.0
+gunicorn==20.1.0
+tiktoken==0.4.0
+Flask-Mail==0.9.1
