@@ -16,5 +16,6 @@ Follow the following steps to launch the application (tested on UNIX based syste
     5. MAIL_PASSWORD *Password that enables access to your mailing server. For Gmail this is the 16 digit "App password" especially created for third party applications*
 6. Run the application by invoking the "main.py" file:
   ```python ./main.py```
+7. Check your browser at the URL: ```localhost:8080```
 <br><br>
 Check the log file "app.log", which will be generated once the app is run, for debugging information. 
