@@ -9,7 +9,7 @@ Follow the following steps to launch the application (tested on UNIX based syste
 4. Install the requirements of this application:
 <br> ```pip install -r ./requirements.txt```
 5. **Update your system environment variables**. You can check [here](https://www3.ntu.edu.sg/home/ehchua/programming/howto/Environment_Variables.html) to figure out how to set environment variables. Following variables are needed by this applciation:
-<br>
+
   1. OPENAI_API_KEY *api key from openai to enable usage of chatGPT*<br>
   2. MAIL_SERVER  *DNS address of the mailing server that you would like to use to send email from. for Gmail it is ususally "smtp.gmail.com"*<br>
   3. MAIL_PORT *Port at which the DNS server of the mailing server listens to. For Gmail it is usually 587*<br>
