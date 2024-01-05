@@ -1,44 +1,27 @@
 import json
 import traceback
-# from src.main import smart_prompts, rag_chat_stream, template
 from flask_cors import CORS, cross_origin
-# from flask import Blueprint, request, Response
 
 
 from flask import Flask, render_template, request, redirect, url_for
 from flask_mail import Mail, Message
 import logging
-import os
+from config import Config
+from .helpers import create_summary
 
-# from .helper_functions import call_qa_backend , call_word_count_backend, call_login_token_backend, get_templateStructure, get_template_word_count
-
-import openai
-
-openai.api_key = os.getenv("OPENAI_API_KEY",default=None)
+config = Config()
 
 app = Flask(__name__)
 
 cors = CORS(app)
             
-@app.route('/chat_stream',methods=['POST','OPTIONS'])
-@cross_origin()
-def streaming_chat_endpoint():
-    pass
-
-@app.route('/template',methods=['POST'])
-@cross_origin()
-def templates_endpoint():
-    pass
-
-
-
 # Configure Flask-Mail settings
-app.config['MAIL_SERVER'] = 'smtp.example.com'  # Update with your SMTP server
-app.config['MAIL_PORT'] = 587  # Update with your SMTP port
-app.config['MAIL_USERNAME'] = 'your_username@example.com'  # Update with your email username
-app.config['MAIL_PASSWORD'] = 'your_password'  # Update with your email password
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_SERVER'] = config.get_property("MAIL_SERVER")
+app.config['MAIL_PORT'] = config.get_property("MAIL_PORT")  # Update with your SMTP port
+app.config['MAIL_USERNAME'] = config.get_property("MAIL_USERNAME")  # Update with your email username
+app.config['MAIL_PASSWORD'] = config.get_property("MAIL_PASSWORD")  # Update with your email password
+app.config['MAIL_USE_TLS'] = config.get_property("MAIL_USE_TLS")
+app.config['MAIL_USE_SSL'] = config.get_property("MAIL_USE_SSL")
 
 mail = Mail(app)
 
@@ -59,8 +42,8 @@ def index():
             # Read file contents
             with open(file.filename, 'r') as f:
                 file_contents = f.read()
-
-            print(file_contents)
+            
+            print(create_summary(file_contents,openai_api_key=config.get_property("OPENAI_API_KEY")))
             # # Send email
             # try:
             #     msg = Message('File Contents', sender='your_email@example.com', recipients=[email])
